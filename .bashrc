@@ -191,6 +191,7 @@ fi
 # ========================
 # WELCOME MESSAGE
 # ========================
+echo
 echo -e "\033[1;32mWelcome back, \033[1;34m$(whoami)\033[0m!"
 echo -e "\033[1;36mSystem: \033[0m$(uname -srm)"
 echo -e "\033[1;36mUptime: \033[0m$(uptime -p | sed 's/up //')"
