@@ -12,7 +12,7 @@ filetype plugin indent on
 " ========================
 
 " Color scheme (using built-in schemes)
-colorscheme slate
+colorscheme molokai
 
 " Line numbers
 set number
