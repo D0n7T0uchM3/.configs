@@ -107,37 +107,44 @@ reset_iptables() {
 # Function to apply iptables rules
 apply_iptables_rules() {
     echo -e "${BLUE}→${NC} Configuring iptables rules..."
+    echo -e "${RED}→${NC} Blocking ALL ports except specified..."
     echo ""
     
     # Flush existing rules
     iptables -F
     iptables -X
+    iptables -Z
     
-    # Set default policies to DROP
+    # Set default policies to DROP (BLOCK EVERYTHING)
+    echo -e "${YELLOW}→${NC} Setting default policy: DROP (block all)"
     iptables -P INPUT DROP
     iptables -P FORWARD DROP
     iptables -P OUTPUT ACCEPT
     
-    # Allow loopback interface
+    # Allow loopback interface (required for local processes)
+    echo -e "${YELLOW}→${NC} Allowing loopback interface (localhost)"
     iptables -A INPUT -i lo -j ACCEPT
     iptables -A OUTPUT -o lo -j ACCEPT
     
-    # Allow established and related connections
+    # Allow established and related connections (replies to outgoing connections)
+    echo -e "${YELLOW}→${NC} Allowing established connections"
     iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
     
-    # Allow ICMP (ping)
-    iptables -A INPUT -p icmp -j ACCEPT
-    
-    # Allow specified ports
-    echo -e "${YELLOW}Opening ports:${NC}"
+    # Allow specified ports ONLY
+    echo ""
+    echo -e "${GREEN}Opening ONLY these ports (all others BLOCKED):${NC}"
     for port_spec in "${PORTS[@]}"; do
         IFS='/' read -r port protocol <<< "$port_spec"
-        echo -e "  ${GREEN}✓${NC} $port/$protocol"
+        echo -e "  ${GREEN}✓${NC} $port/$protocol - OPEN"
         iptables -A INPUT -p "$protocol" --dport "$port" -j ACCEPT
     done
     
+    # Log dropped packets (optional, for debugging)
+    # iptables -A INPUT -j LOG --log-prefix "IPTables-Dropped: " --log-level 4
+    
     echo ""
-    echo -e "${GREEN}✓${NC} IPTables rules applied successfully"
+    echo -e "${RED}✗${NC} All other ports: BLOCKED"
+    echo -e "${GREEN}✓${NC} Firewall rules applied - ONLY specified ports are accessible"
 }
 
 # Function to display current rules
